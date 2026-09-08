@@ -122,7 +122,7 @@ jobs:
         run: node scripts/package.mjs stage-release macos ReleaseFast --require-update-feed
 
       - name: 上传平台产物
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: package-${{ matrix.target }}
           path: zig-out/release/${{ matrix.target }}/
