@@ -1,0 +1,150 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: 校验发布版本
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 校验 tag 与 app.json
+        shell: bash
+        run: |
+          expected="v$(node -p "require('./app.json').version")"
+          if [[ "$GITHUB_REF_NAME" != "$expected" ]]; then
+            echo "Tag $GITHUB_REF_NAME 与 app.json ($expected) 不一致" >&2
+            exit 1
+          fi
+
+  package:
+    name: 打包 ${{ matrix.target }}
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows
+            os: windows-latest
+          - target: macos
+            os: macos-latest
+          - target: linux
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: 安装 Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: 安装 Linux WebView 构建依赖
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev pkg-config
+
+      - name: 确保 Windows ZIP 工具可用
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command zip -ErrorAction SilentlyContinue)) {
+            choco install zip -y --no-progress
+          }
+
+      - name: 安装项目依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 运行检查
+        run: pnpm run check
+
+      - name: 校验可选更新源
+        id: updates
+        if: matrix.target == 'macos'
+        shell: bash
+        run: node scripts/package.mjs update-status "$GITHUB_REPOSITORY" >> "$GITHUB_OUTPUT"
+
+      - name: 构建标准包与 portable 文件
+        run: zig build package portable -Dpackage-target=${{ matrix.target }}
+
+      - name: 签名 macOS 更新 feed
+        if: matrix.target == 'macos' && steps.updates.outputs.updates_enabled == 'true'
+        shell: bash
+        env:
+          NATIVE_UPDATE_PRIVATE_KEY_BASE64: ${{ secrets.NATIVE_UPDATE_PRIVATE_KEY_BASE64 }}
+        run: |
+          key_path="$RUNNER_TEMP/native-update.key"
+          node -e 'const fs = require("node:fs"); const data = Buffer.from(process.env.NATIVE_UPDATE_PRIVATE_KEY_BASE64 || "", "base64"); if (data.length !== 32) throw new Error("NATIVE_UPDATE_PRIVATE_KEY_BASE64 缺失或不是 32 字节私钥"); fs.writeFileSync(process.argv[1], data, { mode: 0o600 });' "$key_path"
+          case "$RUNNER_ARCH" in
+            ARM64) update_target=macos-aarch64 ;;
+            X64) update_target=macos-x86_64 ;;
+            *) echo "不支持的 macOS runner 架构：$RUNNER_ARCH" >&2; exit 1 ;;
+          esac
+          archive="${{ steps.updates.outputs.update_archive }}"
+          archive_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$(basename "$archive")"
+          pnpm exec native update sign \
+            --private-key "$key_path" \
+            --manifest app.json \
+            --archive "$archive" \
+            --url "$archive_url" \
+            --target "$update_target" \
+            --notes "GitHub Release $GITHUB_REF_NAME" \
+            --output "${{ steps.updates.outputs.update_feed }}"
+
+      - name: 校验并整理发布文件
+        if: matrix.target != 'macos' || steps.updates.outputs.updates_enabled != 'true'
+        run: node scripts/package.mjs stage-release ${{ matrix.target }} ReleaseFast
+
+      - name: 校验并整理含更新 feed 的发布文件
+        if: matrix.target == 'macos' && steps.updates.outputs.updates_enabled == 'true'
+        run: node scripts/package.mjs stage-release macos ReleaseFast --require-update-feed
+
+      - name: 上传平台产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.target }}
+          path: zig-out/release/${{ matrix.target }}/
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: 创建 GitHub Release
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 下载三平台产物
+        uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: 发布归档与 portable 文件
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: release-assets/**/*

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "vue.volar",
+    "ziglang.vscode-zig",
+    "oxc.oxc-vscode",
+    "bradlc.vscode-tailwindcss",
+    "editorconfig.editorconfig"
+  ]
+}

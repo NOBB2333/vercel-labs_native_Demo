@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Frontend build output
+src_web/dist/
+
+# Zig build output and caches
+.zig-cache/
+zig-out/
+
+# macOS metadata
+.DS_Store
+
+# Native SDK local artifacts
+.native/
+native-update.key
+
+# Local environment and logs
+.env
+.env.local
+*.log
+*.tsbuildinfo
+
+# CodeGraph local index
+.codegraph/

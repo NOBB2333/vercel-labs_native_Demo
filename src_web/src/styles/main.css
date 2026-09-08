@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgb(38 105 218 / 25%);
+  outline-offset: 2px;
+}

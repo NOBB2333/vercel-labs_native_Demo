@@ -1,0 +1,14 @@
+{
+  "devServer": {
+    "host": "127.0.0.1",
+    "port": 5173,
+    "strictPort": true
+  },
+  "build": {
+    "trace": "events",
+    "debugOverlay": false,
+    "automation": false,
+    "jsBridge": false,
+    "nativeSdkPath": "node_modules/@native-sdk/cli"
+  }
+}

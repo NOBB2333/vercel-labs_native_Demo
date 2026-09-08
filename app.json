@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.native-sdk.dev/app/v1.json",
+  "id": "dev.native_sdk.native-demo",
+  "name": "native-demo",
+  "display_name": "Native Demo",
+  "description": "Reusable Native SDK desktop application template with a Vue frontend and Zig backend.",
+  "version": "0.1.0",
+  "icons": ["assets/icon.png"],
+  "platforms": ["windows", "macos", "linux"],
+  "permissions": [],
+  "capabilities": ["webview", "js_bridge"],
+  "bridge": {
+    "commands": [
+      {
+        "name": "app.health",
+        "origins": ["zero://app", "http://127.0.0.1:5173"]
+      }
+    ]
+  },
+  "frontend": {
+    "dist": "src_web/dist",
+    "entry": "index.html",
+    "spa_fallback": true,
+    "dev": {
+      "url": "http://127.0.0.1:5173/",
+      "command": ["pnpm", "--dir", "src_web", "run", "dev"],
+      "ready_path": "/",
+      "timeout_ms": 30000
+    }
+  },
+  "security": {
+    "navigation": {
+      "allowed_origins": ["zero://app", "zero://inline", "http://127.0.0.1:5173"],
+      "external_links": {
+        "action": "deny"
+      }
+    }
+  },
+  "web_engine": "system",
+  "cef": {
+    "dir": "third_party/cef/macos",
+    "auto_install": false
+  },
+  "windows": [
+    {
+      "label": "main",
+      "title": "Native Demo",
+      "width": 1280,
+      "height": 800,
+      "restore_state": true
+    }
+  ]
+}

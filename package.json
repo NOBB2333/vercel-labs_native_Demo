@@ -1,0 +1,49 @@
+{
+  "name": "native-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vue + Zig + Native SDK WebView desktop application template",
+  "scripts": {
+    "dev": "pnpm run dev:config:check && zig build dev",
+    "build": "pnpm run frontend:build && zig build -Doptimize=ReleaseFast",
+    "test": "zig build test -Dplatform=null",
+    "check": "pnpm run version:check && pnpm run dev:config:check && pnpm run windows:loader:check && pnpm run format:check && pnpm run lint && pnpm run scripts:test && pnpm run frontend:check && pnpm run native:doctor && pnpm run test",
+    "scripts:test": "node --test scripts/*.test.mjs",
+    "package": "pnpm run windows:loader:check && zig build package portable",
+    "package:all": "pnpm run package",
+    "package:standard": "pnpm run windows:loader:check && zig build package",
+    "package:verify": "node scripts/package.mjs verify",
+    "portable": "pnpm run windows:loader:check && zig build portable",
+    "portable:verify": "node scripts/package.mjs verify-portable",
+    "release:stage": "node scripts/package.mjs stage-release",
+    "frontend:dev": "pnpm run dev:config:check && pnpm --dir src_web run dev",
+    "frontend:build": "pnpm --dir src_web run build",
+    "frontend:check": "pnpm --dir src_web run check",
+    "frontend:test": "pnpm --dir src_web run test",
+    "native:doctor": "pnpm exec native doctor --manifest app.json",
+    "format": "oxfmt . && zig fmt build.zig build.zig.zon src",
+    "format:check": "oxfmt --check . && zig fmt --check build.zig build.zig.zon src",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "dev:port": "node scripts/dev-config.mjs set-port",
+    "dev:config:sync": "node scripts/dev-config.mjs sync",
+    "dev:config:check": "node scripts/dev-config.mjs check",
+    "rename": "node scripts/rename.mjs",
+    "version:set": "node scripts/version.mjs set",
+    "version:sync": "node scripts/version.mjs sync",
+    "version:check": "node scripts/version.mjs check",
+    "updates:configure": "node scripts/package.mjs configure-updates",
+    "updates:disable": "node scripts/package.mjs disable-updates",
+    "windows:loader:check": "node scripts/package.mjs check-windows-loaders"
+  },
+  "devDependencies": {
+    "@native-sdk/cli": "0.10.1",
+    "oxfmt": "0.66.0",
+    "oxlint": "1.81.0"
+  },
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11"
+  },
+  "packageManager": "pnpm@11.22.0"
+}
