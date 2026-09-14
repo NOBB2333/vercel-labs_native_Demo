@@ -145,6 +145,7 @@ pub fn build(b: *std.Build) void {
     app_mod.addImport("build_options", options_mod);
     app_mod.addImport("app_manifest_zon", manifest_mod);
     if (app_config.sqlite_capability) addSqliteEngine(b, app_mod, native_sdk_path);
+    addWindowsIconResource(b, target, selected_platform, app_mod);
     addMacosInfoPlist(b, app_mod, target, app_config);
     const exe = b.addExecutable(.{
         .name = app_exe_name,
@@ -159,6 +160,7 @@ pub fn build(b: *std.Build) void {
     if (target.result.os.tag == .windows and optimize != .Debug) {
         exe.subsystem = .windows;
     }
+    addWindowsDpiManifest(b, target, exe, native_sdk_path);
     linkPlatform(b, target, app_mod, exe, selected_platform, web_engine, web_layer, native_sdk_path, cef_dir, cef_auto_install);
     b.installArtifact(exe);
 
@@ -202,6 +204,7 @@ pub fn build(b: *std.Build) void {
         package_app_mod.addImport("build_options", options_mod);
         package_app_mod.addImport("app_manifest_zon", manifest_mod);
         if (app_config.sqlite_capability) addSqliteEngine(b, package_app_mod, native_sdk_path);
+        addWindowsIconResource(b, target, selected_platform, package_app_mod);
         addMacosInfoPlist(b, package_app_mod, target, app_config);
         const built = b.addExecutable(.{
             .name = app_exe_name,
@@ -213,6 +216,7 @@ pub fn build(b: *std.Build) void {
         if (target.result.os.tag == .windows and package_optimize != .Debug) {
             built.subsystem = .windows;
         }
+        addWindowsDpiManifest(b, target, built, native_sdk_path);
         linkPlatform(b, target, package_app_mod, built, selected_platform, web_engine, web_layer, native_sdk_path, cef_dir, cef_auto_install);
         break :pkg built;
     };
@@ -314,6 +318,7 @@ pub fn build(b: *std.Build) void {
     portable_app_mod.addImport("app_manifest_zon", manifest_mod);
     portable_app_mod.addImport("portable_bundle", bundle_module);
     if (app_config.sqlite_capability) addSqliteEngine(b, portable_app_mod, native_sdk_path);
+    addWindowsIconResource(b, target, selected_platform, portable_app_mod);
     addMacosInfoPlist(b, portable_app_mod, target, app_config);
 
     const portable_exe = b.addExecutable(.{
@@ -324,6 +329,7 @@ pub fn build(b: *std.Build) void {
     if (target.result.os.tag == .windows and package_optimize != .Debug) {
         portable_exe.subsystem = .windows;
     }
+    addWindowsDpiManifest(b, target, portable_exe, native_sdk_path);
     linkPlatform(b, target, portable_app_mod, portable_exe, selected_platform, web_engine, web_layer, native_sdk_path, cef_dir, cef_auto_install);
     portable_exe.step.dependOn(&bundle_command.step);
 
@@ -452,6 +458,20 @@ fn localModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.bu
 
 fn nativeSdkPath(b: *std.Build, native_sdk_path: []const u8, sub_path: []const u8) std.Build.LazyPath {
     return .{ .cwd_relative = b.pathJoin(&.{ native_sdk_path, sub_path }) };
+}
+
+/// Windows 高 DPI 清单必须嵌入每一条可执行文件构建路径，避免系统把
+/// 96-DPI 的 WebView 位图放大到显示器缩放比例，导致界面文字发糊。
+fn addWindowsDpiManifest(b: *std.Build, target: std.Build.ResolvedTarget, exe: *std.Build.Step.Compile, native_sdk_path: []const u8) void {
+    if (target.result.os.tag != .windows) return;
+    exe.win32_manifest = nativeSdkPath(b, native_sdk_path, "assets/native-sdk.manifest");
+}
+
+/// 将应用自己的多尺寸 ICO 嵌入 Windows 可执行文件，供任务栏和窗口
+/// 标题栏使用；仅在打包目录生成 app-icon.ico 不会改变 exe 的资源图标。
+fn addWindowsIconResource(b: *std.Build, target: std.Build.ResolvedTarget, platform: PlatformOption, app_mod: *std.Build.Module) void {
+    if (target.result.os.tag != .windows or platform != .windows) return;
+    app_mod.addWin32ResourceFile(.{ .file = b.path("assets/app.rc") });
 }
 
 fn nativeSdkModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, native_sdk_path: []const u8) *std.Build.Module {

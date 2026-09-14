@@ -5,17 +5,12 @@
   "display_name": "Native Demo",
   "description": "Reusable Native SDK desktop application template with a Vue frontend and Zig backend.",
   "version": "0.1.0",
-  "icons": ["assets/icon.png"],
+  "icons": ["assets/icon.png", "assets/icon.ico"],
   "platforms": ["windows", "macos", "linux"],
   "permissions": [],
   "capabilities": ["webview", "js_bridge"],
   "bridge": {
-    "commands": [
-      {
-        "name": "app.health",
-        "origins": ["zero://app", "http://127.0.0.1:5173"]
-      }
-    ]
+    "commands": [{ "name": "app.health", "origins": ["zero://app", "http://127.0.0.1:5173"] }]
   },
   "frontend": {
     "dist": "src_web/dist",
@@ -31,23 +26,12 @@
   "security": {
     "navigation": {
       "allowed_origins": ["zero://app", "zero://inline", "http://127.0.0.1:5173"],
-      "external_links": {
-        "action": "deny"
-      }
+      "external_links": { "action": "deny" }
     }
   },
   "web_engine": "system",
-  "cef": {
-    "dir": "third_party/cef/macos",
-    "auto_install": false
-  },
+  "cef": { "dir": "third_party/cef/macos", "auto_install": false },
   "windows": [
-    {
-      "label": "main",
-      "title": "Native Demo",
-      "width": 1280,
-      "height": 800,
-      "restore_state": true
-    }
+    { "label": "main", "title": "Native Demo", "width": 1280, "height": 800, "restore_state": true }
   ]
 }

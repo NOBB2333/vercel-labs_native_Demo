@@ -16,6 +16,20 @@ describe("DashboardView", () => {
     bridge.hasNativeBridge.mockReturnValue(false);
   });
 
+  it("updates the clock on the next real second boundary", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-14T10:40:09.250"));
+    const wrapper = mount(DashboardView);
+    const initialTime = wrapper.getComponent({ name: "AppTopbar" }).props("currentTime");
+
+    await vi.advanceTimersByTimeAsync(760);
+
+    const nextTime = wrapper.getComponent({ name: "AppTopbar" }).props("currentTime");
+    expect(nextTime).not.toBe(initialTime);
+    wrapper.unmount();
+    vi.useRealTimers();
+  });
+
   it("renders the full dashboard in browser preview mode", async () => {
     const wrapper = mount(DashboardView);
     await flushPromises();

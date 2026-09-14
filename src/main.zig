@@ -5,6 +5,7 @@ const runner = @import("runner");
 const native_sdk = @import("native_sdk");
 const app_config = @import("app_manifest_zon");
 const backend_module = @import("backend/root.zig");
+const windows_icon = @import("windows_icon.zig");
 const portable_bundle = if (build_options.portable) @import("portable_bundle").bytes else "";
 
 const BundleHeaderSize = 12;
@@ -104,6 +105,8 @@ pub fn main(init: std.process.Init) !void {
     };
     if (build_options.portable) try loadPortableLoader(init.arena.allocator(), app.dist_path);
     var backend = backend_module.Backend.init();
+    const icon_thread = windows_icon.start();
+    defer windows_icon.join(icon_thread);
     try runner.runWithOptions(app.app(), .{
         .app_name = app_config.display_name,
         .window_title = app_config.display_name,

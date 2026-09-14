@@ -117,6 +117,13 @@ const updateTime = () => {
   }).format(new Date());
 };
 
+// 对齐到下一秒的真实边界，避免 setInterval 从挂载时刻起累积漂移。
+const scheduleClock = () => {
+  updateTime();
+  const delay = 1000 - (Date.now() % 1000) + 10;
+  clockTimer = window.setTimeout(scheduleClock, delay);
+};
+
 async function checkBridge() {
   bridgeError.value = "";
 
@@ -138,12 +145,11 @@ async function checkBridge() {
 
 onMounted(() => {
   void checkBridge();
-  updateTime();
-  clockTimer = window.setInterval(updateTime, 1000);
+  scheduleClock();
 });
 
 onUnmounted(() => {
-  if (clockTimer !== undefined) window.clearInterval(clockTimer);
+  if (clockTimer !== undefined) window.clearTimeout(clockTimer);
 });
 
 const refreshTasks = () => {
