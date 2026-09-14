@@ -238,10 +238,11 @@ pub fn build(b: *std.Build) void {
         package_optimize_name,
         "--output",
         package_output,
-        // 同时生成可分发的单文件归档和中间应用目录。
-        "--archive",
         "--binary",
     });
+    // Native SDK 0.10.1 在 Windows 上固定调用外部 `zip`。为避免把模板
+    // 绑定到某台机器安装的归档工具，Windows 保留目录包与 portable EXE。
+    if (package_target != .windows) package.addArg("--archive");
     // CLI 从框架根目录解析 SDK 自带的打包输入（包括 WebView2 loader）。
     // 显式传入同一个根目录，避免 PATH 中的 native 来自另一份 SDK。
     package.addFileArg(package_exe.getEmittedBin());

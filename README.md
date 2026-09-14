@@ -86,8 +86,8 @@ pnpm dev:port 5180
 | `pnpm format`                 | 使用 Oxfmt 和 zig fmt 格式化项目                     |
 | `pnpm lint:fix`               | 使用 Oxlint 修复可自动修复的问题                     |
 | `pnpm check`                  | 执行版本、配置、格式、前端、manifest 与 Zig 全套检查 |
-| `pnpm package`                | 构建当前平台的标准归档与 portable 文件               |
-| `pnpm package:standard`       | 只构建当前平台标准包                                 |
+| `pnpm package`                | 构建当前平台的标准包与 portable 文件                 |
+| `pnpm package:standard`       | 只构建当前平台标准包（Windows 为目录）               |
 | `pnpm portable`               | 只构建当前平台 portable 可执行文件                   |
 | `pnpm release:stage <target>` | 校验并整理指定平台待发布文件                         |
 | `pnpm version:set 1.2.3`      | 修改并同步所有应用版本字段                           |
@@ -153,14 +153,14 @@ macOS / Linux：
 Windows PowerShell：
 
 ```powershell
-.\scripts\package.ps1                    # 标准 ZIP + portable EXE（默认）
-.\scripts\package.ps1 -Mode Standard     # 只生成标准 ZIP
+.\scripts\package.ps1                    # 标准目录包 + portable EXE（默认）
+.\scripts\package.ps1 -Mode Standard     # 只生成标准目录包
 .\scripts\package.ps1 -Mode Portable     # 只生成 portable EXE
 ```
 
-本地脚本只构建当前宿主平台，因为原生 WebView、链接器与签名工具不能由另一个系统可靠替代。推送与 `app.json.version` 一致的 `vMAJOR.MINOR.PATCH` tag 后，Release workflow 会一次并行启动 Windows、macOS、Linux 原生 runner，构建标准归档和 `-portable` 单文件，并发布 SHA-256 清单。
+本地脚本只构建当前宿主平台，因为原生 WebView、链接器与签名工具不能由另一个系统可靠替代。推送与 `app.json.version` 一致的 `vMAJOR.MINOR.PATCH` tag 后，Release workflow 会一次并行启动 Windows、macOS、Linux 原生 runner；Windows 发布 portable EXE，macOS/Linux 发布标准归档和 portable 文件，并生成 SHA-256 清单。
 
-Native SDK 0.10.1 的标准格式是 Windows ZIP、macOS DMG、Linux tar.gz；其中 DMG 是安装磁盘映像，ZIP/tar.gz 是分发归档，并非 MSI/EXE 安装向导或 AppImage。模板没有用改后缀的方式伪造安装器。需要企业安装器或应用商店包时，应在具体项目中引入对应平台工具并配置签名。
+Native SDK 0.10.1 的 Windows ZIP 步骤依赖系统额外安装 `zip` 命令。为了让模板在干净的 Windows 机器上也能直接构建，Windows 默认输出未压缩的标准目录包和 portable EXE，Release 只整理 portable EXE；macOS、Linux 仍分别输出 DMG 和 tar.gz。DMG 是安装磁盘映像，目录包和归档都不是 MSI/EXE 安装向导或 AppImage。需要 Windows ZIP、企业安装器或应用商店包时，应在具体项目中选择归档/安装工具并配置签名。
 
 基于 GitHub Release 的自动更新已预留，但模板默认关闭且不关联当前仓库。Native SDK 0.10.1 的更新器仅支持打包后的 macOS `.app`；启用方法、密钥和架构限制见 [`docs/release.md`](docs/release.md)。
 

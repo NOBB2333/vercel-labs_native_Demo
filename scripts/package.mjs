@@ -195,7 +195,8 @@ function verify(target, optimize) {
       ? resolve(info.packageDir, "Contents", "Resources", "frontend")
       : resolve(info.packageDir, "resources", "frontend");
 
-  for (const path of [executablePath, frontendPath, info.archivePath]) assertReadableFile(path);
+  for (const path of [executablePath, frontendPath]) assertReadableFile(path);
+  if (target !== "windows") assertReadableFile(info.archivePath);
   if (target === "macos" && info.manifest.updates) assertReadableFile(info.updateArchivePath);
   if (target === "windows") {
     const loaderPath = resolve(info.packageDir, "bin", "WebView2Loader.dll");
@@ -210,7 +211,11 @@ function verify(target, optimize) {
   if (existsSync(legacyFrontendPath)) {
     throw new Error(`发现迁移前的残留资源目录：${legacyFrontendPath}`);
   }
-  console.log(`标准包校验通过：${info.baseName}${info.archiveSuffix}`);
+  console.log(
+    target === "windows"
+      ? `Windows 标准目录包校验通过：${info.packageDir}`
+      : `标准包校验通过：${info.baseName}${info.archiveSuffix}`,
+  );
 }
 
 /** 将已嵌入资源的二进制复制成命名稳定的 portable 发布文件。 */
@@ -290,10 +295,10 @@ function stageRelease(target, optimize, requireUpdateFeed = false) {
   rmSync(releaseDir, { force: true, recursive: true });
   mkdirSync(releaseDir, { recursive: true });
 
-  const artifacts = [
-    { kind: "standard-archive", path: info.archivePath },
-    { kind: "portable", path: info.portablePath },
-  ];
+  const artifacts = [{ kind: "portable", path: info.portablePath }];
+  if (target !== "windows") {
+    artifacts.unshift({ kind: "standard-archive", path: info.archivePath });
+  }
   if (target === "macos" && info.manifest.updates) {
     artifacts.push({ kind: "update-archive", path: info.updateArchivePath });
     if (existsSync(info.updateFeedPath)) {

@@ -131,7 +131,7 @@ flowchart LR
 - 当前 dashboard 保留页面级 CSS：这是为了不改变已有视觉基线；新功能可以使用 Tailwind，但不需要机械改写稳定样式。
 - 三平台使用原生 runner：构建速度不如单机交叉编译，但能真实链接各平台 WebView，并产出可验证的原生归档。
 - portable 是单个分发文件，不等于全静态程序：macOS/Linux 仍用系统 WebView，Windows 仍需要已安装的 WebView2 Runtime。
-- Windows ZIP 与 Linux tar.gz 是标准分发归档，不是安装向导。Native SDK 0.10.1 尚不生成 MSI、安装型 EXE、deb/rpm、AppImage 或 Flatpak，具体项目需要时再选择并维护外部打包器。
+- Windows 默认保留标准目录包并发布 portable EXE，不依赖额外 ZIP 工具；Linux tar.gz 是标准分发归档。这些产物都不是安装向导。Native SDK 0.10.1 尚不生成 MSI、安装型 EXE、deb/rpm、AppImage 或 Flatpak，具体项目需要时再选择并维护外部打包器。
 - GitHub Release 更新采用显式 opt-in：少一个开箱即用开关，但避免模板误连原仓库，也避免未签名更新链路。
 
 ## 一致性约束

@@ -39,18 +39,18 @@ tag 必须精确等于 `v${version}`。例如 `app.json.version` 为 `1.2.3-beta
 
 ## 产物矩阵
 
-| 平台    | Native SDK 标准目录                            | 标准发布文件 | portable 文件                                            |
-| ------- | ---------------------------------------------- | ------------ | -------------------------------------------------------- |
-| Windows | `native-demo-<version>-windows-ReleaseFast/`   | `.zip`       | `native-demo-<version>-windows-ReleaseFast-portable.exe` |
-| macOS   | `native-demo-<version>-macos-ReleaseFast.app/` | `.dmg`       | `native-demo-<version>-macos-ReleaseFast-portable`       |
-| Linux   | `native-demo-<version>-linux-ReleaseFast/`     | `.tar.gz`    | `native-demo-<version>-linux-ReleaseFast-portable`       |
+| 平台    | Native SDK 标准目录                            | 标准发布文件   | portable 文件                                            |
+| ------- | ---------------------------------------------- | -------------- | -------------------------------------------------------- |
+| Windows | `native-demo-<version>-windows-ReleaseFast/`   | 不生成额外归档 | `native-demo-<version>-windows-ReleaseFast-portable.exe` |
+| macOS   | `native-demo-<version>-macos-ReleaseFast.app/` | `.dmg`         | `native-demo-<version>-macos-ReleaseFast-portable`       |
+| Linux   | `native-demo-<version>-linux-ReleaseFast/`     | `.tar.gz`      | `native-demo-<version>-linux-ReleaseFast-portable`       |
 
-标准目录是打包中间结果，不直接上传。`scripts/package.mjs stage-release` 会验证标准目录、归档与 portable，再将公开文件复制到 `zig-out/release/<target>/`，同时生成：
+标准目录是打包中间结果，不直接上传。`scripts/package.mjs stage-release` 会验证标准目录和 portable，并在 macOS/Linux 上额外验证标准归档，再将公开文件复制到 `zig-out/release/<target>/`，同时生成：
 
 - `<base>-SHA256SUMS.txt`：供用户校验下载文件。
 - `<base>-manifest.json`：记录类型、字节数与 SHA-256，供后续自动化读取。
 
-Windows ZIP 和 Linux tar.gz 是可解压运行的分发归档，不是安装向导。Native SDK 0.10.1 尚不生成 MSI、安装型 EXE、deb/rpm、AppImage 或 Flatpak；模板不通过修改扩展名伪造这些格式。macOS DMG 是拖入 Applications 的安装磁盘映像。
+Native SDK 0.10.1 的 Windows ZIP 步骤要求额外的 `zip` 命令，因此模板默认跳过它，不安装或绑定任何归档工具。Linux tar.gz 是可解压运行的分发归档，macOS DMG 是拖入 Applications 的安装磁盘映像；它们都不是 MSI、安装型 EXE、deb/rpm、AppImage 或 Flatpak，模板不会通过修改扩展名伪造这些格式。
 
 ## 本地打包
 
@@ -65,8 +65,8 @@ macOS 和 Linux：
 Windows PowerShell：
 
 ```powershell
-.\scripts\package.ps1                    # 标准 ZIP + portable EXE
-.\scripts\package.ps1 -Mode Standard     # 只构建标准 ZIP
+.\scripts\package.ps1                    # 标准目录包 + portable EXE
+.\scripts\package.ps1 -Mode Standard     # 只构建标准目录包
 .\scripts\package.ps1 -Mode Portable     # 只构建 portable EXE
 ```
 
@@ -104,7 +104,7 @@ git push origin v1.2.3
 
 1. 校验 tag 与 `app.json.version`。
 2. 在 Windows、macOS、Linux 原生 runner 上并行检查和构建。
-3. 每个平台同时生成标准归档和 portable。
+3. Windows 生成标准目录包和 portable EXE；macOS/Linux 生成标准归档和 portable。
 4. 通过同一个 `package.mjs` 规则验证并整理发布文件。
 5. 上传三平台文件、SHA-256 清单和 artifact manifest，最后创建 GitHub Release。
 
@@ -181,7 +181,7 @@ Windows 的系统 WebView 模式包含两个不同依赖，不应混为一谈：
 
 | 场景                 | loader 来源                                                 | 运行时位置                                   |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------- |
-| 标准 Windows ZIP     | `node_modules/@native-sdk/cli/third_party/webview2/<arch>/` | 与 `bin/<app>.exe` 同目录                    |
+| 标准 Windows 目录包  | `node_modules/@native-sdk/cli/third_party/webview2/<arch>/` | 与 `bin/<app>.exe` 同目录                    |
 | portable Windows EXE | 同一 Native SDK 目标架构目录                                | 内嵌在 EXE，启动时释放到随机缓存目录并预加载 |
 | 仓库基准文件         | `assets/WebView2Loader.dll`，固定为 x86-64                  | 不直接进入正式包，用于模板审计、对照和恢复   |
 
@@ -189,7 +189,7 @@ Windows 的系统 WebView 模式包含两个不同依赖，不应混为一谈：
 
 升级 `@native-sdk/cli` 时，先运行冻结安装和 `pnpm windows:loader:check`，再在 Windows runner 上构建并启动两类产物。仓库基准文件与 SDK 文件不要求字节相同，它们可能来自不同的 Microsoft WebView2 SDK 版本；如果决定更新基准文件，应单独审查来源、架构和二进制 diff，不能顺手删除。
 
-如果标准 ZIP 中缺少 DLL，`node scripts/package.mjs verify windows ReleaseFast` 会失败。如果 portable 未能释放或预加载 loader，程序会返回 `PortableWebView2LoaderUnavailable`，而不是静默启动一个空窗口。
+如果标准目录包中缺少 DLL，`node scripts/package.mjs verify windows ReleaseFast` 会失败。如果 portable 未能释放或预加载 loader，程序会返回 `PortableWebView2LoaderUnavailable`，而不是静默启动一个空窗口。
 
 ## 平台注意事项
 
