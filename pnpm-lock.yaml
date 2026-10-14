@@ -22,13 +22,13 @@ importers:
     dependencies:
       lucide-vue-next:
         specifier: ^0.544.0
-        version: 0.544.0(vue@3.5.42(typescript@5.9.3))
+        version: 0.544.0(vue@3.5.42(typescript@7.0.2))
       vue:
         specifier: ^3.5.42
-        version: 3.5.42(typescript@5.9.3)
+        version: 3.5.42(typescript@7.0.2)
       vue-router:
         specifier: ^4.6.4
-        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
+        version: 4.6.4(vue@3.5.42(typescript@7.0.2))
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
@@ -38,10 +38,10 @@ importers:
         version: 24.13.3
       '@vitejs/plugin-vue':
         specifier: ^6.0.8
-        version: 6.0.8(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))(vue@3.5.42(typescript@5.9.3))
+        version: 6.0.8(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))(vue@3.5.42(typescript@7.0.2))
       '@vue/test-utils':
         specifier: ^2.5.0
-        version: 2.5.0(@vue/compiler-dom@3.5.42)(@vue/server-renderer@3.5.42)(vue@3.5.42(typescript@5.9.3))
+        version: 2.5.0(@vue/compiler-dom@3.5.42)(@vue/server-renderer@3.5.42)(vue@3.5.42(typescript@7.0.2))
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
@@ -49,8 +49,8 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^7.0.2
+        version: 7.0.2
       vite:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@24.13.3)(jiti@2.7.0)
@@ -59,7 +59,7 @@ importers:
         version: 4.1.11(@types/node@24.13.3)(jsdom@30.0.1)(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))
       vue-tsc:
         specifier: ^3.3.11
-        version: 3.3.11(typescript@5.9.3)
+        version: 3.3.11(typescript@7.0.2)
 
 packages:
 
@@ -1175,6 +1175,7 @@ packages:
 
   lucide-vue-next@0.544.0:
     resolution: {integrity: sha512-mDp/AdGOPIDkpFHnFiTWgQgCST9aBXHVaiobZfOMIvv7nrOukzF/TP+7KoOwrngdWRaH9TMiepMBIX1vsgKJ3g==}
+    deprecated: Package deprecated. Please use @lucide/vue instead.
     peerDependencies:
       vue: '>=3.0.1'
 
@@ -1945,11 +1946,11 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@vitejs/plugin-vue@6.0.8(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))(vue@3.5.42(typescript@5.9.3))':
+  '@vitejs/plugin-vue@6.0.8(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))(vue@3.5.42(typescript@7.0.2))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.2.2(@types/node@24.13.3)(jiti@2.7.0)
-      vue: 3.5.42(typescript@5.9.3)
+      vue: 3.5.42(typescript@7.0.2)
 
   '@vitest/expect@4.1.11':
     dependencies:
@@ -1998,13 +1999,13 @@ snapshots:
 
   '@volar/source-map@2.4.28': {}
 
-  '@volar/typescript@2.4.28(typescript@5.9.3)':
+  '@volar/typescript@2.4.28(typescript@7.0.2)':
     dependencies:
       '@volar/language-core': 2.4.28
       path-browserify: 1.0.1
       vscode-uri: 3.2.0
     optionalDependencies:
-      typescript: 5.9.3
+      typescript: 7.0.2
 
   '@vue/compiler-core@3.5.42':
     dependencies:
@@ -2072,11 +2073,11 @@ snapshots:
 
   '@vue/shared@3.5.42': {}
 
-  '@vue/test-utils@2.5.0(@vue/compiler-dom@3.5.42)(@vue/server-renderer@3.5.42)(vue@3.5.42(typescript@5.9.3))':
+  '@vue/test-utils@2.5.0(@vue/compiler-dom@3.5.42)(@vue/server-renderer@3.5.42)(vue@3.5.42(typescript@7.0.2))':
     dependencies:
       '@vue/compiler-dom': 3.5.42
       js-beautify: 2.0.3
-      vue: 3.5.42(typescript@5.9.3)
+      vue: 3.5.42(typescript@7.0.2)
       vue-component-type-helpers: 3.3.11
     optionalDependencies:
       '@vue/server-renderer': 3.5.42
@@ -2315,9 +2316,9 @@ snapshots:
 
   lru-cache@11.5.2: {}
 
-  lucide-vue-next@0.544.0(vue@3.5.42(typescript@5.9.3)):
+  lucide-vue-next@0.544.0(vue@3.5.42(typescript@7.0.2)):
     dependencies:
-      vue: 3.5.42(typescript@5.9.3)
+      vue: 3.5.42(typescript@7.0.2)
 
   magic-string@0.30.21:
     dependencies:
@@ -2563,18 +2564,18 @@ snapshots:
 
   vue-component-type-helpers@3.3.11: {}
 
-  vue-router@4.6.4(vue@3.5.42(typescript@5.9.3)):
+  vue-router@4.6.4(vue@3.5.42(typescript@7.0.2)):
     dependencies:
       '@vue/devtools-api': 6.6.4
-      vue: 3.5.42(typescript@5.9.3)
+      vue: 3.5.42(typescript@7.0.2)
 
-  vue-tsc@3.3.11(typescript@5.9.3):
+  vue-tsc@3.3.11(typescript@7.0.2):
     dependencies:
-      '@volar/typescript': 2.4.28(typescript@5.9.3)
+      '@volar/typescript': 2.4.28(typescript@7.0.2)
       '@vue/language-core': 3.3.11
-      typescript: 5.9.3
+      typescript: 7.0.2
 
-  vue@3.5.42(typescript@5.9.3):
+  vue@3.5.42(typescript@7.0.2):
     dependencies:
       '@vue/compiler-dom': 3.5.42
       '@vue/compiler-sfc': 3.5.42
@@ -2582,7 +2583,7 @@ snapshots:
       '@vue/server-renderer': 3.5.42
       '@vue/shared': 3.5.42
     optionalDependencies:
-      typescript: 5.9.3
+      typescript: 7.0.2
 
   w3c-xmlserializer@5.0.0:
     dependencies:
